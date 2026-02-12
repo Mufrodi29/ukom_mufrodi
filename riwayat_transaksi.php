@@ -225,6 +225,26 @@ $stats = mysqli_fetch_assoc($stats_query);
             border-color: transparent !important;
         }
 
+        /* Modal Custom */
+        .modal-content{
+            background: rgba(15,23,42,.95) !important;
+            border: 1px solid rgba(255,255,255,.15) !important;
+            border-radius: 20px !important;
+            backdrop-filter: blur(20px);
+        }
+        .modal-header{
+            border-bottom: 1px solid rgba(255,255,255,.10) !important;
+        }
+        .modal-footer{
+            border-top: 1px solid rgba(255,255,255,.10) !important;
+        }
+        .modal-title{
+            color: var(--text) !important;
+        }
+        .btn-close{
+            filter: invert(1);
+        }
+
         @media (max-width: 767px){
             .content-wrap{ padding: 16px; }
         }
@@ -333,8 +353,11 @@ $stats = mysqli_fetch_assoc($stats_query);
 
                 <!-- FILTER -->
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <i class="bi bi-funnel-fill me-2"></i> Filter & Pencarian
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span><i class="bi bi-funnel-fill me-2"></i> Filter & Pencarian</span>
+                        <button type="button" class="btn btn-sm btn-success btn-pill" data-bs-toggle="modal" data-bs-target="#laporanModal">
+                            <i class="bi bi-file-earmark-text me-1"></i> Cetak Laporan
+                        </button>
                     </div>
                     <div class="card-body">
                         <form method="GET" action="">
@@ -479,6 +502,58 @@ $stats = mysqli_fetch_assoc($stats_query);
     </div>
 </div>
 
+<!-- MODAL LAPORAN -->
+<div class="modal fade" id="laporanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-file-earmark-text me-2"></i> Cetak Laporan
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formLaporan">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Pilih Jenis Laporan</label>
+                        <select class="form-select" id="tipeLaporan" required>
+                            <option value="">-- Pilih Tipe --</option>
+                            <option value="harian">Laporan Harian</option>
+                            <option value="bulanan">Laporan Bulanan</option>
+                            <option value="tahunan">Laporan Tahunan</option>
+                        </select>
+                    </div>
+
+                    <div id="inputHarian" style="display:none;">
+                        <label class="form-label">Pilih Tanggal</label>
+                        <input type="date" class="form-control" id="tanggalHarian" value="<?= date('Y-m-d'); ?>">
+                    </div>
+
+                    <div id="inputBulanan" style="display:none;">
+                        <label class="form-label">Pilih Bulan</label>
+                        <input type="month" class="form-control" id="bulanBulanan" value="<?= date('Y-m'); ?>">
+                    </div>
+
+                    <div id="inputTahunan" style="display:none;">
+                        <label class="form-label">Pilih Tahun</label>
+                        <select class="form-select" id="tahunTahunan">
+                            <?php for($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                            <option value="<?= $y; ?>"><?= $y; ?></option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-pill" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary btn-pill" onclick="cetakLaporan()">
+                    <i class="bi bi-printer me-1"></i> Cetak
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Auto active menu
     const currentPage = window.location.pathname.split('/').pop();
@@ -488,6 +563,46 @@ $stats = mysqli_fetch_assoc($stats_query);
             link.classList.add('active');
         }
     });
+
+    // Toggle input berdasarkan tipe laporan
+    document.getElementById('tipeLaporan').addEventListener('change', function() {
+        document.getElementById('inputHarian').style.display = 'none';
+        document.getElementById('inputBulanan').style.display = 'none';
+        document.getElementById('inputTahunan').style.display = 'none';
+
+        if (this.value === 'harian') {
+            document.getElementById('inputHarian').style.display = 'block';
+        } else if (this.value === 'bulanan') {
+            document.getElementById('inputBulanan').style.display = 'block';
+        } else if (this.value === 'tahunan') {
+            document.getElementById('inputTahunan').style.display = 'block';
+        }
+    });
+
+    // Fungsi cetak laporan
+    function cetakLaporan() {
+        const tipe = document.getElementById('tipeLaporan').value;
+        
+        if (!tipe) {
+            alert('Silakan pilih jenis laporan terlebih dahulu!');
+            return;
+        }
+
+        let url = 'cetak_laporan.php?tipe=' + tipe;
+
+        if (tipe === 'harian') {
+            const tanggal = document.getElementById('tanggalHarian').value;
+            url += '&tanggal=' + tanggal;
+        } else if (tipe === 'bulanan') {
+            const bulan = document.getElementById('bulanBulanan').value;
+            url += '&bulan=' + bulan;
+        } else if (tipe === 'tahunan') {
+            const tahun = document.getElementById('tahunTahunan').value;
+            url += '&tahun=' + tahun;
+        }
+
+        window.open(url, '_blank');
+    }
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

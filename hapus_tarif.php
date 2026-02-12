@@ -2,21 +2,41 @@
 session_start();
 include "config/koneksi.php";
 
-// CEK LOGIN
+/* =========================
+   CEK LOGIN
+========================= */
 if (!isset($_SESSION['login'])) {
     header("Location: index.php");
     exit;
 }
 
-// AMBIL ID USER LOGIN
-$id_user   = $_SESSION['id_user'];
-$nama_user = $_SESSION['nama_user'];
-$role      = $_SESSION['role'];
+/* =========================
+   AMBIL SESSION USER (AMAN)
+========================= */
+$id_user   = $_SESSION['id_user'] ?? null;
+$nama_user = $_SESSION['nama_user'] ?? ''; // biar gak warning kalau belum diset
+$role      = $_SESSION['role'] ?? '';
 
-// AMBIL ID TARIF
+if (!$id_user) {
+    $_SESSION['error'] = "Session user tidak valid. Silakan login ulang.";
+    header("Location: index.php");
+    exit;
+}
+
+/* =========================
+   AMBIL ID TARIF DARI GET
+========================= */
 $id_tarif = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
-// CEK DATA TARIF
+if ($id_tarif <= 0) {
+    $_SESSION['error'] = "ID tarif tidak valid!";
+    header("Location: tarif.php");
+    exit;
+}
+
+/* =========================
+   CEK DATA TARIF
+========================= */
 $cek = mysqli_query($koneksi, "SELECT * FROM tb_tarif WHERE id_tarif='$id_tarif'");
 $data = mysqli_fetch_assoc($cek);
 
@@ -26,18 +46,37 @@ if (!$data) {
     exit;
 }
 
-// SIMPAN INFO UNTUK LOG
+/* =========================
+   CEK FK: APAKAH TARIF DIPAKAI DI TRANSAKSI?
+   (Agar tidak error CONSTRAINT)
+========================= */
+$qcek_fk = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM tb_transaksi WHERE id_tarif='$id_tarif'");
+$row_fk  = mysqli_fetch_assoc($qcek_fk);
+$total_pakai = (int)($row_fk['total'] ?? 0);
+
+if ($total_pakai > 0) {
+    $_SESSION['error'] = "Tarif tidak bisa dihapus karena masih digunakan oleh $total_pakai transaksi!";
+    header("Location: tarif.php");
+    exit;
+}
+
+/* =========================
+   INFO UNTUK LOG
+========================= */
 $jenis_kendaraan = $data['jenis_kendaraan'];
-$tarif = number_format($data['tarif_per_jam'], 0, ',', '.');
+$tarif_rp = number_format((float)$data['tarif_per_jam'], 0, ',', '.');
 
-
-// PROSES HAPUS
+/* =========================
+   PROSES HAPUS
+========================= */
 $hapus = mysqli_query($koneksi, "DELETE FROM tb_tarif WHERE id_tarif='$id_tarif'");
 
 if ($hapus) {
 
-    // LOG AKTIVITAS
-    $aktivitas = "Menghapus tarif parkir untuk $jenis_kendaraan sebesar Rp $tarif";
+    /* =========================
+       LOG AKTIVITAS
+    ========================= */
+    $aktivitas = "Menghapus tarif parkir untuk $jenis_kendaraan sebesar Rp $tarif_rp";
 
     mysqli_query($koneksi, "
         INSERT INTO tb_log_aktivitas (id_user, aktivitas, waktu_aktivitas)

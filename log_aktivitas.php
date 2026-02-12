@@ -113,90 +113,101 @@ $query = mysqli_query($koneksi, "
             .content-wrap{ padding: 16px; }
         }
 
-        /* =========================================================
-   FIX: TABLE PUTIH -> DARK + TEKS KELIHATAN (FINAL)
-   ========================================================= */
+        /* TABLE DARK */
+        .table-responsive{
+            border-radius: 16px;
+            overflow: hidden;
+        }
 
-/* container tabel (biar nyatu sama card glass) */
-.table-responsive{
-  border-radius: 16px;
-  overflow: hidden;
-}
+        .table,
+        .table *{
+            background: transparent !important;
+        }
 
-/* paksa semua bagian tabel transparan/dark */
-.table,
-.table *{
-  background: transparent !important;
-}
+        .table th,
+        .table td{
+            color: rgba(255,255,255,.88) !important;
+            border-color: rgba(255,255,255,.10) !important;
+        }
 
-/* warna teks default tabel */
-.table th,
-.table td{
-  color: rgba(255,255,255,.88) !important;
-  border-color: rgba(255,255,255,.10) !important;
-}
+        .table thead th{
+            background: rgba(255,255,255,.08) !important;
+            color: rgba(255,255,255,.70) !important;
+            border-bottom: 1px solid rgba(255,255,255,.14) !important;
+        }
 
-/* header */
-.table thead th{
-  background: rgba(255,255,255,.08) !important;
-  color: rgba(255,255,255,.70) !important;
-  border-bottom: 1px solid rgba(255,255,255,.14) !important;
-}
+        .table tbody tr{
+            background: rgba(255,255,255,.04) !important;
+        }
 
-/* body rows (normal) */
-.table tbody tr{
-  background: rgba(255,255,255,.04) !important;
-}
+        .table-striped > tbody > tr:nth-of-type(odd){
+            background: rgba(255,255,255,.06) !important;
+        }
 
-/* striped rows */
-.table-striped > tbody > tr:nth-of-type(odd){
-  background: rgba(255,255,255,.06) !important;
-}
+        .table-hover > tbody > tr:hover{
+            background: rgba(255,255,255,.10) !important;
+        }
 
-/* hover */
-.table-hover > tbody > tr:hover{
-  background: rgba(255,255,255,.10) !important;
-}
+        .table-striped > tbody > tr > *{
+            background: transparent !important;
+        }
 
-/* jika masih ada yang maksa putih dari bootstrap */
-.table-striped > tbody > tr > *{
-  background: transparent !important;
-}
+        /* BADGE */
+        .badge{
+            border-radius: 999px !important;
+            padding: .45rem .75rem !important;
+            font-weight: 700 !important;
+        }
 
-/* =========================================================
-   BADGE: tetap kelihatan
-   ========================================================= */
-.badge{
-  border-radius: 999px !important;
-  padding: .45rem .75rem !important;
-  font-weight: 700 !important;
-}
+        .badge.bg-primary{
+            background: rgba(99,102,241,.18) !important;
+            color: #a5b4fc !important;
+            border: 1px solid rgba(99,102,241,.40) !important;
+        }
 
-/* Admin/Petugas (biru) */
-.badge.bg-primary{
-  background: rgba(99,102,241,.18) !important;
-  color: #a5b4fc !important;
-  border: 1px solid rgba(99,102,241,.40) !important;
-}
+        .badge.bg-success{
+            background: rgba(34,197,94,.18) !important;
+            color: #22c55e !important;
+            border: 1px solid rgba(34,197,94,.40) !important;
+        }
 
-/* Success (hijau) */
-.badge.bg-success{
-  background: rgba(34,197,94,.18) !important;
-  color: #22c55e !important;
-  border: 1px solid rgba(34,197,94,.40) !important;
-}
+        .badge.bg-warning{
+            background: rgba(245,158,11,.18) !important;
+            color: #fbbf24 !important;
+            border: 1px solid rgba(245,158,11,.40) !important;
+        }
+        .badge.bg-danger{
+            background: rgba(239,68,68,.18) !important;
+            color: #fb7185 !important;
+            border: 1px solid rgba(239,68,68,.40) !important;
+        }
 
-/* warning/danger kalau kepake */
-.badge.bg-warning{
-  background: rgba(245,158,11,.18) !important;
-  color: #fbbf24 !important;
-  border: 1px solid rgba(245,158,11,.40) !important;
-}
-.badge.bg-danger{
-  background: rgba(239,68,68,.18) !important;
-  color: #fb7185 !important;
-  border: 1px solid rgba(239,68,68,.40) !important;
-}
+        /* MODAL DARK */
+        .modal-content{
+            background: rgba(15, 23, 42, 0.95) !important;
+            border: 1px solid rgba(255,255,255,.15) !important;
+            backdrop-filter: blur(20px);
+        }
+        .modal-header{
+            border-bottom: 1px solid rgba(255,255,255,.10) !important;
+        }
+        .modal-footer{
+            border-top: 1px solid rgba(255,255,255,.10) !important;
+        }
+        .form-control, .form-select{
+            background: rgba(255,255,255,.08) !important;
+            border: 1px solid rgba(255,255,255,.15) !important;
+            color: var(--text) !important;
+        }
+        .form-control:focus, .form-select:focus{
+            background: rgba(255,255,255,.12) !important;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+            color: var(--text) !important;
+        }
+        .form-label{
+            color: rgba(255,255,255,.85) !important;
+        }
 
     </style>
 </head>
@@ -241,6 +252,13 @@ $query = mysqli_query($koneksi, "
                     <div>
                         <h2 class="fw-bold mb-1">Log Aktivitas Sistem</h2>
                         <div class="subtle">Riwayat aktivitas pengguna sistem parkir</div>
+                    </div>
+                    
+                    <!-- TOMBOL CETAK LAPORAN -->
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-soft btn-pill px-3" data-bs-toggle="modal" data-bs-target="#modalCetakLaporan">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Cetak Laporan
+                        </button>
                     </div>
                 </div>
 
@@ -309,14 +327,122 @@ $query = mysqli_query($koneksi, "
     </div>
 </div>
 
+<!-- MODAL CETAK LAPORAN -->
+<div class="modal fade" id="modalCetakLaporan" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                    Cetak Laporan Log Aktivitas
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form method="POST" action="cetak_log_aktivitas.php" target="_blank">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Jenis Laporan</label>
+                        <select name="jenis_laporan" id="jenisLaporan" class="form-select" required>
+                            <option value="">-- Pilih Jenis Laporan --</option>
+                            <option value="semua">Semua Log Aktivitas</option>
+                            <option value="bulan">Per Bulan</option>
+                            <option value="rentang">Per Rentang Tanggal</option>
+                            <option value="user">Per User</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Filter Bulan -->
+                    <div class="mb-3" id="bulanGroup" style="display: none;">
+                        <label class="form-label fw-semibold">Pilih Bulan</label>
+                        <input type="month" name="bulan" id="bulan" class="form-control">
+                    </div>
+                    
+                    <!-- Filter Rentang Tanggal -->
+                    <div id="rentangGroup" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tanggal Mulai</label>
+                            <input type="date" name="tanggal_mulai" id="tanggalMulai" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tanggal Selesai</label>
+                            <input type="date" name="tanggal_selesai" id="tanggalSelesai" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <!-- Filter User -->
+                    <div class="mb-3" id="userGroup" style="display: none;">
+                        <label class="form-label fw-semibold">Pilih User</label>
+                        <select name="id_user" id="idUser" class="form-select">
+                            <option value="">-- Pilih User --</option>
+                            <?php
+                            $users = mysqli_query($koneksi, "SELECT id_user, nama_lengkap, role FROM tb_user ORDER BY nama_lengkap");
+                            while($u = mysqli_fetch_assoc($users)) {
+                                echo '<option value="'.$u['id_user'].'">'.$u['nama_lengkap'].' ('.$u['role'].')</option>';
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    
+                    <div class="alert" style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: #93c5fd;">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <small>Laporan akan dibuka di tab baru dalam format PDF</small>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-pill" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger btn-pill">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Active menu otomatis (tanpa ubah sidebar HTML)
+    // Active menu otomatis
     const path = window.location.pathname.split('/').pop();
     document.querySelectorAll('.nav-link').forEach(a => {
         const href = (a.getAttribute('href') || '').trim();
         if (!href || href === '#') return;
         if (href === path) a.classList.add('active');
+    });
+
+    // Filter form cetak laporan
+    const jenisLaporan = document.getElementById('jenisLaporan');
+    const bulanGroup = document.getElementById('bulanGroup');
+    const rentangGroup = document.getElementById('rentangGroup');
+    const userGroup = document.getElementById('userGroup');
+    const bulanInput = document.getElementById('bulan');
+    const tanggalMulai = document.getElementById('tanggalMulai');
+    const tanggalSelesai = document.getElementById('tanggalSelesai');
+    const idUser = document.getElementById('idUser');
+    
+    jenisLaporan.addEventListener('change', function() {
+        // Reset semua
+        bulanGroup.style.display = 'none';
+        rentangGroup.style.display = 'none';
+        userGroup.style.display = 'none';
+        bulanInput.removeAttribute('required');
+        tanggalMulai.removeAttribute('required');
+        tanggalSelesai.removeAttribute('required');
+        idUser.removeAttribute('required');
+        
+        // Show sesuai pilihan
+        if(this.value === 'bulan') {
+            bulanGroup.style.display = 'block';
+            bulanInput.setAttribute('required', 'required');
+        } else if(this.value === 'rentang') {
+            rentangGroup.style.display = 'block';
+            tanggalMulai.setAttribute('required', 'required');
+            tanggalSelesai.setAttribute('required', 'required');
+        } else if(this.value === 'user') {
+            userGroup.style.display = 'block';
+            idUser.setAttribute('required', 'required');
+        }
     });
 </script>
 

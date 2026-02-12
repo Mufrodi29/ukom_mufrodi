@@ -8,53 +8,89 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     exit;
 }
 
-// Cek ID
-if (!isset($_GET['id']) || empty($_GET['id'])) {
-    header("Location: area.php?pesan=id_tidak_valid");
+// AMBIL SESSION USER
+$id_user      = $_SESSION['id_user'] ?? 0;
+$nama_lengkap = $_SESSION['nama_lengkap'] ?? '';
+$role         = $_SESSION['role'] ?? '';
+
+if ($id_user <= 0) {
+    $_SESSION['error'] = "Session user tidak valid. Silakan login ulang.";
+    header("Location: " . (($_SERVER['HTTP_REFERER'] ?? './area_parkir.php')));
     exit;
 }
 
-$id_area = mysqli_real_escape_string($koneksi, $_GET['id']);
+// URL BALIK (BIAR GAK 404)
+$back_url = $_SERVER['HTTP_REFERER'] ?? './area_parkir.php';
 
-// Cek apakah data ada
-$query_cek = mysqli_query($koneksi, "SELECT * FROM tb_area_parkir WHERE id_area = '$id_area'");
-if (mysqli_num_rows($query_cek) == 0) {
-    header("Location: area.php?pesan=data_tidak_ditemukan");
+// AMBIL ID AREA
+$id_area = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+if ($id_area <= 0) {
+    $_SESSION['error'] = "ID area tidak valid!";
+    header("Location: $back_url");
     exit;
 }
 
-$data = mysqli_fetch_assoc($query_cek);
+// CEK DATA AREA PARKIR
+$qArea = mysqli_query($koneksi, "SELECT * FROM tb_area_parkir WHERE id_area='$id_area'");
+$dataArea = mysqli_fetch_assoc($qArea);
 
-// Cek apakah area masih terisi
-if ($data['terisi'] > 0) {
-    header("Location: area.php?pesan=area_masih_terisi");
+if (!$dataArea) {
+    $_SESSION['error'] = "Data area parkir tidak ditemukan!";
+    header("Location: $back_url");
     exit;
 }
 
-// PROSES HAPUS
-$hapus = mysqli_query($koneksi, "DELETE FROM tb_area_parkir WHERE id_area = '$id_area'");
+// SIMPAN INFO AREA UNTUK PESAN & LOG
+$nama_area = $dataArea['nama_area'] ?? '-';
+$kapasitas = (int)($dataArea['kapasitas'] ?? 0);
+$terisi    = (int)($dataArea['terisi'] ?? 0);
 
-if ($hapus) {
+// HITUNG TRANSAKSI TERKAIT (opsional buat info)
+$qCount = mysqli_query($koneksi, "SELECT COUNT(*) AS total FROM tb_transaksi WHERE id_area='$id_area'");
+$rCount = mysqli_fetch_assoc($qCount);
+$total_transaksi = (int)($rCount['total'] ?? 0);
 
-    // ===== LOG AKTIVITAS =====
-    $id_user = $_SESSION['id_user']; // petugas login
-    $nama_area = $data['nama_area'];
-    $aktivitas = "Menghapus area parkir: $nama_area";
+// ================================
+// MULAI TRANSAKSI BIAR AMAN
+// ================================
+mysqli_begin_transaction($koneksi);
+
+try {
+    // 1) HAPUS DULU DATA ANAK (tb_transaksi) agar FK tidak menolak
+    $hapus_transaksi = mysqli_query($koneksi, "DELETE FROM tb_transaksi WHERE id_area='$id_area'");
+    if (!$hapus_transaksi) {
+        throw new Exception("Gagal menghapus transaksi terkait: " . mysqli_error($koneksi));
+    }
+
+    // 2) BARU HAPUS AREA
+    $hapus_area = mysqli_query($koneksi, "DELETE FROM tb_area_parkir WHERE id_area='$id_area'");
+    if (!$hapus_area) {
+        throw new Exception("Gagal menghapus area: " . mysqli_error($koneksi));
+    }
+
+    // 3) LOG AKTIVITAS
+    $aktivitas = "Menghapus area parkir: $nama_area (kapasitas $kapasitas, terisi $terisi) | Menghapus transaksi terkait: $total_transaksi data";
 
     $log = mysqli_query($koneksi, "
-    INSERT INTO tb_log_aktivitas (id_user, aktivitas)
-    VALUES ('$id_user', '$aktivitas')
-");
+        INSERT INTO tb_log_aktivitas (id_user, aktivitas, waktu_aktivitas)
+        VALUES ('$id_user', '$aktivitas', NOW())
+    ");
 
+    if (!$log) {
+        throw new Exception("Area terhapus, tapi gagal menyimpan log: " . mysqli_error($koneksi));
+    }
 
-    // Optional debug kalau log gagal
-    // if (!$log) { die(mysqli_error($koneksi)); }
+    mysqli_commit($koneksi);
 
-    header("Location: area.php?pesan=hapus_sukses");
+    $_SESSION['success'] = "Area <b>$nama_area</b> berhasil dihapus! (Transaksi terkait: <b>$total_transaksi</b> ikut terhapus)";
+    header("Location: $back_url");
     exit;
 
-} else {
-    header("Location: area.php?pesan=hapus_gagal");
+} catch (Exception $e) {
+    mysqli_rollback($koneksi);
+    $_SESSION['error'] = $e->getMessage();
+    header("Location: $back_url");
     exit;
 }
 ?>
